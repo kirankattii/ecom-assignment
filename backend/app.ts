@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
@@ -53,6 +54,20 @@ app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Product Management API is running 🚀",
+  });
+});
+
+/**
+ * Diagnostics Endpoint
+ */
+app.get("/api/diagnose", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Diagnostics info",
+    dbState: mongoose.connection.readyState,
+    hasMongoUri: !!process.env.MONGODB_URI,
+    nodeEnv: process.env.NODE_ENV,
+    vercelEnv: process.env.VERCEL_ENV,
   });
 });
 
