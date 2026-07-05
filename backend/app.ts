@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { default as helmet } from "helmet";
+import helmet from "helmet";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 
@@ -16,7 +16,7 @@ const app = express();
 /**
  * Security Middleware
  */
-app.use(helmet());
+app.use((helmet as any)());
 
 /**
  * CORS
