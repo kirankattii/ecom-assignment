@@ -22,15 +22,25 @@ app.use((helmet as any)());
 /**
  * CORS
  */
-const allowedOrigins = process.env.CLIENT_URL
-  ? process.env.CLIENT_URL.split(",").map((origin) => origin.trim())
-  : ["http://localhost:5173", "https://ecom-assignment-frontend.vercel.app/"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://ecom-assignment-frontend.vercel.app",
+];
+
+if (process.env.CLIENT_URL) {
+  const origins = process.env.CLIENT_URL.split(",").map((o) => o.trim());
+  allowedOrigins.push(...origins);
+}
+
+// Clean trailing slashes
+const normalizedOrigins = allowedOrigins.map((o) => o.replace(/\/$/, ""));
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps, postman, curl)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || normalizedOrigins.includes(origin.replace(/\/$/, ""))) {
         callback(null, true);
       } else {
         callback(new Error(`Origin ${origin} not allowed by CORS`));
