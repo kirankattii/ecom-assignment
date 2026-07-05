@@ -26,7 +26,7 @@ const navItems = [
 const Sidebar = () => {
   return (
     <aside className="sticky top-[69px] h-[calc(100vh-69px)] bg-white border-r border-slate-200 pt-6 overflow-y-auto flex-shrink-0">
-      <ul className="flex flex-col gap-1 px-3">
+      <ul className="flex flex-col gap-1 pr-1 md:px-3">
         {navItems.map((item) => (
           <li key={item.to}>
             <NavLink
@@ -34,7 +34,7 @@ const Sidebar = () => {
               className={({ isActive }) =>
                 `flex items-center gap-3 py-3 px-4 md:px-6 md:min-w-64 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-indigo-50 text-indigo-600 border-r-3 border-indigo-600 shadow-sm shadow-indigo-500/5"
+                    ? "bg-green-50 text-[#17AD4C] border-r-3 border-[#17AD4C] shadow-sm shadow-green-500/5"
                     : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                 }`
               }

@@ -243,13 +243,13 @@ export const updateProduct = asyncHandler(
       throw new ApiError(400, "Invalid product ID.");
     }
 
-    const { name, description, category, price, stock, isActive } =
+    const { name, description, category, price, stock, isActive, existingImages } =
       req.body || {};
 
     const files = req.files as Express.Multer.File[];
 
-    // Optimization: If no new images are being uploaded, perform a single atomic findByIdAndUpdate
-    if (!files || files.length === 0) {
+    // Optimization: If no new images are being uploaded and no image modifications are made, perform a single atomic findByIdAndUpdate
+    if ((!files || files.length === 0) && existingImages === undefined) {
       const updateData: any = {};
 
       if (name !== undefined) {
@@ -301,8 +301,8 @@ export const updateProduct = asyncHandler(
     }
 
     /**
-     * If new images are provided, we must find the product first,
-     * upload new images, and delete old images.
+     * If new images are provided or existing images are modified, we must find the product first,
+     * upload new images, delete old removed images, and merge them.
      */
     const product = await Product.findById(id);
 
@@ -343,15 +343,44 @@ export const updateProduct = asyncHandler(
     }
 
     /**
-     * Replace Images
+     * Replace or Merge Images
      */
-    const publicIds = product.images.map((image) => image.publicId);
-    deleteMultipleImages(publicIds).catch((err) => {
-      console.error("❌ Failed to delete old Cloudinary images in background:", err);
-    });
+    let keptImages: { url: string; publicId: string }[] = [];
+    if (existingImages !== undefined) {
+      try {
+        keptImages = typeof existingImages === "string" ? JSON.parse(existingImages) : existingImages;
+      } catch (e) {
+        keptImages = [];
+      }
 
-    const uploadedImages = await uploadMultipleImages(files, "products");
-    product.images = uploadedImages;
+      // Find images that were removed
+      const deletedImages = product.images.filter(
+        (img) => !keptImages.some((k) => k.publicId === img.publicId)
+      );
+      if (deletedImages.length > 0) {
+        const deleteIds = deletedImages.map((img) => img.publicId);
+        deleteMultipleImages(deleteIds).catch((err) => {
+          console.error("❌ Failed to delete old Cloudinary images in background:", err);
+        });
+      }
+
+      let uploadedImages: { url: string; publicId: string }[] = [];
+      if (files && files.length > 0) {
+        uploadedImages = await uploadMultipleImages(files, "products");
+      }
+      product.images = [...keptImages, ...uploadedImages];
+    } else {
+      // Legacy behavior: Replace all images if files are provided
+      if (files && files.length > 0) {
+        const publicIds = product.images.map((image) => image.publicId);
+        deleteMultipleImages(publicIds).catch((err) => {
+          console.error("❌ Failed to delete old Cloudinary images in background:", err);
+        });
+
+        const uploadedImages = await uploadMultipleImages(files, "products");
+        product.images = uploadedImages;
+      }
+    }
 
     await product.save();
 

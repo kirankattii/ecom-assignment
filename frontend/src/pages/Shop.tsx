@@ -3,7 +3,11 @@ import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { AdminContext } from "../context/AdminContext";
 import { useDebounce } from "../hooks/useDebounce";
-import { HiOutlineHeart, HiOutlineMagnifyingGlass } from "react-icons/hi2";
+import {
+  HiOutlineHeart,
+  HiHeart,
+  HiOutlineMagnifyingGlass,
+} from "react-icons/hi2";
 
 interface Product {
   _id: string;
@@ -33,7 +37,7 @@ const categories = [
   "Beauty",
   "Sports",
   "Books",
-  "Other"
+  "Other",
 ];
 
 const Shop = () => {
@@ -41,10 +45,18 @@ const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Filter & Search states
-  const [searchVal, setSearchVal] = useState<string>(searchParams.get("search") || "");
-  const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get("category") || "All Categories");
-  const [sortOption, setSortOption] = useState<string>(searchParams.get("sort") || "newest");
-  const [page, setPage] = useState<number>(Number(searchParams.get("page")) || 1);
+  const [searchVal, setSearchVal] = useState<string>(
+    searchParams.get("search") || "",
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get("category") || "All Categories",
+  );
+  const [sortOption, setSortOption] = useState<string>(
+    searchParams.get("sort") || "newest",
+  );
+  const [page, setPage] = useState<number>(
+    Number(searchParams.get("page")) || 1,
+  );
 
   // Debounced search value
   const debouncedSearch = useDebounce<string>(searchVal, 400);
@@ -54,12 +66,33 @@ const Shop = () => {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Wishlist state persisted in Local Storage
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("wishlist") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
   // Input ref for auto-focusing
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Dynamic values helper to match image templates
-  const getRating = () => 4.5;
+  // Original price helper
   const getOriginalPrice = (price: number) => (price * 1.1).toFixed(2);
+
+  // Toggle wishlist handler
+  const toggleWishlist = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlist((prev) => {
+      const updated = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
+      localStorage.setItem("wishlist", JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   // Auto focus search if redirect parameter present
   useEffect(() => {
@@ -76,7 +109,8 @@ const Shop = () => {
   useEffect(() => {
     const params: Record<string, string> = {};
     if (debouncedSearch) params.search = debouncedSearch;
-    if (selectedCategory !== "All Categories") params.category = selectedCategory;
+    if (selectedCategory !== "All Categories")
+      params.category = selectedCategory;
     if (sortOption !== "newest") params.sort = sortOption;
     if (page > 1) params.page = String(page);
 
@@ -111,7 +145,7 @@ const Shop = () => {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, [backendUrl, debouncedSearch, selectedCategory, sortOption, page]);
 
@@ -140,21 +174,20 @@ const Shop = () => {
 
   return (
     <div className="flex-1 bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ">
         {/* Title Heading */}
-        <div className="mb-10">
+        <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
             All{" "}
             <span className="relative inline-block">
               products
-              <span className="absolute bottom-[-6px] left-0 right-0 h-1 bg-[#ff6f00] rounded" />
+              <span className="absolute bottom-[-6px] left-0 right-0 h-1 bg-[#17AD4C] rounded" />
             </span>
           </h2>
         </div>
 
         {/* Filter and Search Bar */}
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center gap-4 mb-10 shadow-sm">
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center gap-4 mb-6 shadow-sm">
           {/* Search Box */}
           <div className="relative w-full md:flex-1">
             <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -165,7 +198,7 @@ const Shop = () => {
               ref={searchInputRef}
               type="text"
               placeholder="Search products by name..."
-              className="bg-white border border-slate-250 border-slate-200 rounded-xl pl-11 pr-4 py-2.5 sm:py-3 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#ff6f00] focus:ring-2 focus:ring-[#ff6f00]/15 w-full text-sm sm:text-base transition-all"
+              className="bg-white border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 sm:py-3 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-2 focus:ring-[#17AD4C]/15 w-full text-sm sm:text-base transition-all"
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
             />
@@ -178,7 +211,7 @@ const Shop = () => {
               <select
                 value={selectedCategory}
                 onChange={handleCategoryChange}
-                className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:py-3 text-slate-700 font-medium text-sm focus:outline-none focus:border-[#ff6f00] focus:ring-2 focus:ring-[#ff6f00]/15 w-full md:min-w-48 transition-all cursor-pointer"
+                className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:py-3 text-slate-700 font-medium text-sm focus:outline-none focus:border-[#17AD4C] focus:ring-2 focus:ring-[#17AD4C]/15 w-full md:min-w-48 transition-all cursor-pointer"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -193,7 +226,7 @@ const Shop = () => {
               <select
                 value={sortOption}
                 onChange={handleSortChange}
-                className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:py-3 text-slate-700 font-medium text-sm focus:outline-none focus:border-[#ff6f00] focus:ring-2 focus:ring-[#ff6f00]/15 w-full md:min-w-44 transition-all cursor-pointer"
+                className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 sm:py-3 text-slate-700 font-medium text-sm focus:outline-none focus:border-[#17AD4C] focus:ring-2 focus:ring-[#17AD4C]/15 w-full md:min-w-44 transition-all cursor-pointer"
               >
                 <option value="newest">Sort: Newest</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -209,7 +242,10 @@ const Shop = () => {
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {Array.from({ length: 8 }).map((_, idx) => (
-              <div key={idx} className="animate-pulse bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+              <div
+                key={idx}
+                className="animate-pulse bg-white border border-slate-100 rounded-2xl p-4 shadow-sm"
+              >
                 <div className="aspect-square bg-slate-100 rounded-xl mb-4" />
                 <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
                 <div className="h-3 bg-slate-100 rounded w-1/2 mb-4" />
@@ -226,23 +262,38 @@ const Shop = () => {
               {products.map((product) => (
                 <div
                   key={product._id}
-                  className="bg-white border border-slate-200/85 hover:border-[#ff6f00]/30 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+                  className="bg-white border border-slate-200/85 hover:border-[#17AD4C]/30 rounded-2xl p-2 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
                 >
                   {/* Image wrapper */}
-                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center mb-4 sm:mb-5">
+                  <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center mb-4 ">
                     <img
                       src={product.images?.[0]?.url || ""}
                       alt={product.name}
-                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover p-2 group-hover:scale-105 transition-transform duration-300"
                     />
-                    <button className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-slate-400 hover:text-rose-500 border border-slate-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer">
-                      <HiOutlineHeart className="text-base" />
+                    <button
+                      onClick={(e) => toggleWishlist(product._id, e)}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-slate-400 hover:scale-110 active:scale-95 transition-all shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer"
+                      title={
+                        wishlist.includes(product._id)
+                          ? "Remove from wishlist"
+                          : "Add to wishlist"
+                      }
+                    >
+                      {wishlist.includes(product._id) ? (
+                        <HiHeart className="text-rose-500 text-base" />
+                      ) : (
+                        <HiOutlineHeart className="text-slate-400 text-base" />
+                      )}
                     </button>
                   </div>
 
                   {/* Content details */}
                   <div className="flex-1 flex flex-col">
-                    <Link to={`/product/${product._id}`} className="hover:text-[#ff6f00] transition-colors">
+                    <Link
+                      to={`/product/${product._id}`}
+                      className="hover:text-[#17AD4C] transition-colors"
+                    >
                       <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-snug line-clamp-1">
                         {product.name}
                       </h3>
@@ -251,31 +302,16 @@ const Shop = () => {
                       {product.description}
                     </p>
 
-                    {/* Rating placeholder to match design */}
-                    <div className="flex items-center gap-1 mt-2.5 mb-2 sm:mb-3">
-                      <div className="flex text-amber-400 text-xs">
-                        {"★".repeat(5)}
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-500">
-                        {getRating()}
-                      </span>
-                    </div>
-
                     {/* Price and Action */}
                     <div className="flex items-center justify-between gap-2 mt-auto pt-3 border-t border-slate-100">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 text-sm sm:text-base">
-                          ${product.price.toFixed(2)}
-                        </span>
-                        <span className="text-[10px] text-slate-400 line-through">
-                          ${getOriginalPrice(product.price)}
-                        </span>
-                      </div>
+                      <span className="font-bold text-slate-900 text-sm sm:text-base">
+                        ₹{product.price.toFixed(2)}
+                      </span>
                       <Link
                         to={`/product/${product._id}`}
-                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 hover:border-[#ff6f00] text-slate-700 hover:text-white hover:bg-[#ff6f00] transition-all duration-200 cursor-pointer"
+                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 hover:border-[#17AD4C] text-slate-700 hover:text-white hover:bg-[#17AD4C] transition-all duration-200 cursor-pointer"
                       >
-                        Buy now
+                        Buy <span className="hidden sm:inline">now</span>
                       </Link>
                     </div>
                   </div>
@@ -287,9 +323,12 @@ const Shop = () => {
             {products.length === 0 && (
               <div className="text-center py-20 bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-6">
                 <span className="text-4xl">🔍</span>
-                <h3 className="text-slate-700 font-semibold text-lg mt-3">No Products Found</h3>
+                <h3 className="text-slate-700 font-semibold text-lg mt-3">
+                  No Products Found
+                </h3>
                 <p className="text-slate-400 text-sm mt-1 max-w-sm mx-auto">
-                  We couldn't find any products matching your active filter criteria. Try adjusting your search term or category.
+                  We couldn't find any products matching your active filter
+                  criteria. Try adjusting your search term or category.
                 </p>
                 <button
                   onClick={() => {
@@ -297,7 +336,7 @@ const Shop = () => {
                     setSelectedCategory("All Categories");
                     setSortOption("newest");
                   }}
-                  className="mt-4 text-sm font-semibold text-[#ff6f00] hover:text-[#e65c00] border-b border-[#ff6f00] hover:border-transparent transition-all cursor-pointer"
+                  className="mt-4 text-sm font-semibold text-[#17AD4C] hover:text-[#139841] border-b border-[#17AD4C] hover:border-transparent transition-all cursor-pointer"
                 >
                   Reset filters
                 </button>
@@ -311,13 +350,23 @@ const Shop = () => {
                 <div className="text-xs sm:text-sm text-slate-500 font-medium">
                   Showing{" "}
                   <span className="font-semibold text-slate-800">
-                    {Math.min((page - 1) * pagination.limit + 1, pagination.totalProducts)}
+                    {Math.min(
+                      (page - 1) * pagination.limit + 1,
+                      pagination.totalProducts,
+                    )}
                   </span>{" "}
                   to{" "}
                   <span className="font-semibold text-slate-800">
-                    {Math.min(page * pagination.limit, pagination.totalProducts)}
+                    {Math.min(
+                      page * pagination.limit,
+                      pagination.totalProducts,
+                    )}
                   </span>{" "}
-                  of <span className="font-semibold text-slate-800">{pagination.totalProducts}</span> entries
+                  of{" "}
+                  <span className="font-semibold text-slate-800">
+                    {pagination.totalProducts}
+                  </span>{" "}
+                  entries
                 </div>
 
                 {/* Page Buttons */}
@@ -336,8 +385,8 @@ const Shop = () => {
                       onClick={() => setPage(num)}
                       className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                         num === page
-                          ? "bg-[#ff6f00] text-white shadow-md shadow-orange-500/10"
-                          : "bg-white border border-slate-250 border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-350 cursor-pointer"
+                          ? "bg-[#17AD4C] text-white shadow-md shadow-green-500/10"
+                          : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-350 cursor-pointer"
                       }`}
                     >
                       {num}
@@ -345,7 +394,9 @@ const Shop = () => {
                   ))}
 
                   <button
-                    onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                    onClick={() =>
+                      setPage((p) => Math.min(pagination.totalPages, p + 1))
+                    }
                     disabled={page === pagination.totalPages}
                     className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:border-slate-350 disabled:opacity-45 disabled:hover:text-slate-600 disabled:hover:border-slate-200 transition-all cursor-pointer disabled:cursor-not-allowed"
                   >
@@ -356,7 +407,6 @@ const Shop = () => {
             )}
           </>
         )}
-
       </div>
     </div>
   );

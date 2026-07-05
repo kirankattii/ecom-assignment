@@ -19,7 +19,7 @@ const Dashboard = () => {
   if (!dashData) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin h-8 w-8 border-2 border-indigo-500 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-2 border-[#17AD4C] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -29,10 +29,10 @@ const Dashboard = () => {
       label: "Total Products",
       value: dashData.totalProducts,
       icon: HiOutlineCube,
-      gradient: "from-indigo-500 to-blue-500",
-      shadow: "shadow-indigo-500/5",
-      bg: "bg-indigo-50",
-      text: "text-indigo-600",
+      gradient: "from-green-500 to-emerald-500",
+      shadow: "shadow-green-500/5",
+      bg: "bg-green-50",
+      text: "text-[#17AD4C]",
     },
     {
       label: "Active Products",
@@ -64,24 +64,26 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex-1 p-6 md:p-8">
+    <div className="flex-1 p-3 md:p-8">
       <h2 className="text-xl font-semibold text-slate-900 mb-6">Dashboard</h2>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className={`bg-white border border-slate-200/80 rounded-xl p-5 hover:scale-[1.02] transition-all duration-300 ${stat.shadow} shadow-md`}
+            className={`bg-white border border-slate-200/80 rounded-xl p-2 sm:p-5 hover:scale-[1.02] transition-all duration-300 ${stat.shadow} shadow-md`}
           >
             <div className="flex items-center gap-4">
               <div
-                className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}
+                className={`h-8 w-8 sm:w-12 sm:h-12 rounded-xl ${stat.bg} flex items-center justify-center`}
               >
-                <stat.icon className={`text-2xl ${stat.text}`} />
+                <stat.icon className={`text-xl sm:text-2xl ${stat.text}`} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+                <p className="text-xl sm:text-2xl font-bold text-slate-800">
+                  {stat.value}
+                </p>
                 <p className="text-sm text-slate-500">{stat.label}</p>
               </div>
             </div>
@@ -91,8 +93,8 @@ const Dashboard = () => {
 
       {/* Latest Products */}
       <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden shadow-sm">
-        <div className="flex items-center gap-2.5 px-6 py-4 border-b border-slate-100">
-          <HiOutlineCube className="text-indigo-600 text-lg" />
+        <div className="flex items-center gap-2.5 px-3 sm:px-6 py-4 border-b border-slate-100">
+          <HiOutlineCube className="text-[#17AD4C] text-lg" />
           <p className="font-semibold text-slate-900">Recent Products</p>
         </div>
         <div>
@@ -112,7 +114,7 @@ const Dashboard = () => {
                 </p>
                 <p className="text-slate-500 text-xs">{product.category}</p>
               </div>
-              <div className="text-right">
+              <div className="text-right hidden sm:block">
                 <p className="text-slate-800 font-semibold text-sm">
                   ₹{product.price.toLocaleString()}
                 </p>
@@ -123,7 +125,7 @@ const Dashboard = () => {
                 </p>
               </div>
               <span
-                className={`ml-4 text-xs font-medium px-2.5 py-1 rounded-full border ${
+                className={`hidden sm:block ml-4 text-xs font-medium px-2.5 py-1 rounded-full border ${
                   product.isActive
                     ? "bg-emerald-50 text-emerald-600 border-emerald-100/60"
                     : "bg-slate-100 text-slate-500 border-slate-200/60"

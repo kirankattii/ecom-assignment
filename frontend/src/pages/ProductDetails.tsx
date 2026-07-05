@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { AdminContext } from "../context/AdminContext";
-import { HiOutlineHeart } from "react-icons/hi2";
+import { HiOutlineHeart, HiHeart } from "react-icons/hi2";
 
 interface Product {
   _id: string;
@@ -25,9 +25,28 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [featuredLoading, setFeaturedLoading] = useState<boolean>(true);
 
-  // Dynamic values helper to match image templates
-  const getRating = () => 4.5;
+  // Wishlist state persisted in Local Storage
+  const [wishlist, setWishlist] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("wishlist") || "[]");
+    } catch {
+      return [];
+    }
+  });
+
+  // Original price helper
   const getOriginalPrice = (price: number) => (price * 1.1).toFixed(2);
+
+  // Toggle wishlist handler
+  const toggleWishlist = (targetId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWishlist((prev) => {
+      const updated = prev.includes(targetId) ? prev.filter((item) => item !== targetId) : [...prev, targetId];
+      localStorage.setItem("wishlist", JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -103,8 +122,8 @@ const ProductDetails = () => {
         <h2 className="text-2xl font-bold text-slate-800">Product Not Found</h2>
         <p className="text-slate-500 mt-2">The product you're looking for does not exist or has been removed.</p>
         <Link
-          to="/shop"
-          className="mt-6 inline-block bg-[#ff6f00] hover:bg-[#e65c00] text-white font-semibold px-6 py-2.5 rounded-xl text-sm"
+          to="/"
+          className="mt-6 inline-block bg-[#17AD4C] hover:bg-[#139841] text-white font-semibold px-6 py-2.5 rounded-xl text-sm"
         >
           Back to Shop
         </Link>
@@ -118,9 +137,7 @@ const ProductDetails = () => {
         
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 mb-8 sm:mb-12">
-          <Link to="/" className="hover:text-[#ff6f00] transition-colors">Home</Link>
-          <span>/</span>
-          <Link to="/shop" className="hover:text-[#ff6f00] transition-colors">Shop</Link>
+          <Link to="/" className="hover:text-[#17AD4C] transition-colors">Shop</Link>
           <span>/</span>
           <span className="text-slate-600 truncate max-w-[200px]">{product.name}</span>
         </div>
@@ -137,8 +154,16 @@ const ProductDetails = () => {
                 alt={product.name}
                 className="w-full h-full object-contain p-4 sm:p-6"
               />
-              <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white text-slate-400 hover:text-rose-500 border border-slate-150 flex items-center justify-center shadow-md active:scale-95 hover:scale-105 transition-all cursor-pointer">
-                <HiOutlineHeart className="text-xl" />
+              <button
+                onClick={(e) => toggleWishlist(product._id, e)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white text-slate-400 hover:scale-105 active:scale-95 transition-all shadow-md border border-slate-150 flex items-center justify-center cursor-pointer"
+                title={wishlist.includes(product._id) ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                {wishlist.includes(product._id) ? (
+                  <HiHeart className="text-rose-500 text-xl" />
+                ) : (
+                  <HiOutlineHeart className="text-slate-400 text-xl" />
+                )}
               </button>
             </div>
 
@@ -151,7 +176,7 @@ const ProductDetails = () => {
                     onClick={() => setActiveImageIndex(idx)}
                     className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-50 border transition-all flex-shrink-0 cursor-pointer ${
                       idx === activeImageIndex
-                        ? "border-[#ff6f00] scale-95 shadow-md shadow-orange-500/5"
+                        ? "border-[#17AD4C] scale-95 shadow-md shadow-green-500/5"
                         : "border-slate-200 hover:border-slate-400"
                     }`}
                   >
@@ -169,7 +194,7 @@ const ProductDetails = () => {
           {/* Right Column: Product Metadata and Pricing */}
           <div className="flex flex-col gap-5 sm:gap-6">
             <div>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-[#ff6f00] border border-orange-100 mb-3 sm:mb-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-[#17AD4C] border border-green-100 mb-3 sm:mb-4">
                 {product.category}
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
@@ -177,23 +202,10 @@ const ProductDetails = () => {
               </h1>
             </div>
 
-            {/* Rating */}
-            <div className="flex items-center gap-2">
-              <div className="flex text-amber-400 text-sm">
-                {"★".repeat(5)}
-              </div>
-              <span className="text-xs sm:text-sm font-semibold text-slate-500">
-                ({getRating()})
-              </span>
-            </div>
-
             {/* Pricing */}
             <div className="flex items-baseline gap-3">
               <span className="text-3xl sm:text-4xl font-bold text-slate-900">
-                ${product.price.toFixed(2)}
-              </span>
-              <span className="text-sm sm:text-base text-slate-400 line-through">
-                ${getOriginalPrice(product.price)}
+                ₹{product.price.toFixed(2)}
               </span>
             </div>
 
@@ -241,8 +253,8 @@ const ProductDetails = () => {
               <button className="flex-1 py-3 px-6 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-350 text-sm font-semibold transition-all duration-200 cursor-pointer text-center">
                 Add to Cart
               </button>
-              <button className="flex-1 py-3 px-6 rounded-xl bg-[#ff6f00] hover:bg-[#e65c00] text-white text-sm font-semibold shadow-lg shadow-orange-500/20 active:scale-98 transition-all cursor-pointer text-center">
-                Buy now
+              <button className="flex-1 py-3 px-6 rounded-xl bg-[#17AD4C] hover:bg-[#139841] text-white text-sm font-semibold shadow-lg shadow-green-500/20 active:scale-98 transition-all cursor-pointer text-center">
+                Buy <span className="hidden sm:inline">now</span>
               </button>
             </div>
 
@@ -256,7 +268,7 @@ const ProductDetails = () => {
               Featured{" "}
               <span className="relative inline-block">
                 Products
-                <span className="absolute bottom-[-4px] left-0 right-0 h-0.5 bg-[#ff6f00] rounded" />
+                <span className="absolute bottom-[-4px] left-0 right-0 h-0.5 bg-[#17AD4C] rounded" />
               </span>
             </h2>
           </div>
@@ -280,7 +292,7 @@ const ProductDetails = () => {
               {featuredProducts.map((p) => (
                 <div
                   key={p._id}
-                  className="bg-white border border-slate-200/85 hover:border-[#ff6f00]/30 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
+                  className="bg-white border border-slate-200/85 hover:border-[#17AD4C]/30 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
                 >
                   <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center mb-4">
                     <img
@@ -288,13 +300,21 @@ const ProductDetails = () => {
                       alt={p.name}
                       className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     />
-                    <button className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-slate-400 hover:text-rose-500 border border-slate-100 flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-sm cursor-pointer">
-                      <HiOutlineHeart className="text-base" />
+                    <button
+                      onClick={(e) => toggleWishlist(p._id, e)}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-slate-400 hover:scale-110 active:scale-95 transition-all shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer"
+                      title={wishlist.includes(p._id) ? "Remove from wishlist" : "Add to wishlist"}
+                    >
+                      {wishlist.includes(p._id) ? (
+                        <HiHeart className="text-rose-500 text-base" />
+                      ) : (
+                        <HiOutlineHeart className="text-slate-400 text-base" />
+                      )}
                     </button>
                   </div>
 
                   <div className="flex-1 flex flex-col">
-                    <Link to={`/product/${p._id}`} className="hover:text-[#ff6f00] transition-colors">
+                    <Link to={`/product/${p._id}`} className="hover:text-[#17AD4C] transition-colors">
                       <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-snug line-clamp-1">
                         {p.name}
                       </h3>
@@ -303,29 +323,15 @@ const ProductDetails = () => {
                       {p.description}
                     </p>
 
-                    <div className="flex items-center gap-1 mt-2.5 mb-3">
-                      <div className="flex text-amber-400 text-xs">
-                        {"★".repeat(5)}
-                      </div>
-                      <span className="text-[11px] font-semibold text-slate-500">
-                        {getRating()}
-                      </span>
-                    </div>
-
                     <div className="flex items-center justify-between gap-2 mt-auto pt-3 border-t border-slate-100">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 text-sm sm:text-base">
-                          ${p.price.toFixed(2)}
-                        </span>
-                        <span className="text-[10px] text-slate-400 line-through">
-                          ${getOriginalPrice(p.price)}
-                        </span>
-                      </div>
+                      <span className="font-bold text-slate-900 text-sm sm:text-base">
+                        ₹{p.price.toFixed(2)}
+                      </span>
                       <Link
                         to={`/product/${p._id}`}
-                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 hover:border-[#ff6f00] text-slate-700 hover:text-white hover:bg-[#ff6f00] transition-all duration-200 cursor-pointer"
+                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 hover:border-[#17AD4C] text-slate-700 hover:text-white hover:bg-[#17AD4C] transition-all duration-200 cursor-pointer"
                       >
-                        Buy now
+                        Buy <span className="hidden sm:inline">now</span>
                       </Link>
                     </div>
                   </div>

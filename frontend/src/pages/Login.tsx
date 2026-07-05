@@ -42,8 +42,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       {/* Background gradient orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#17AD4C]/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#139841]/5 rounded-full blur-3xl" />
       </div>
 
       <form
@@ -53,7 +53,7 @@ const Login = () => {
         <div className="bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl p-8 shadow-xl shadow-slate-200/50">
           {/* Logo */}
           <div className="flex flex-col items-center gap-3 mb-8">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#17AD4C] to-[#139841] flex items-center justify-center shadow-lg shadow-green-500/30">
               <HiOutlineShoppingBag className="text-white text-2xl" />
             </div>
             <div className="text-center">
@@ -70,7 +70,7 @@ const Login = () => {
               Email
             </label>
             <input
-              className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+              className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
               type="email"
               placeholder="admin@example.com"
               value={email}
@@ -85,7 +85,7 @@ const Login = () => {
               Password
             </label>
             <input
-              className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+              className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
               type="password"
               placeholder="••••••••"
               value={password}
@@ -98,7 +98,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-200 shadow-lg shadow-indigo-500/25 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-[#17AD4C] to-[#139841] hover:from-[#139841] hover:to-[#0f7d34] focus:outline-none focus:ring-2 focus:ring-[#17AD4C]/50 transition-all duration-200 shadow-lg shadow-green-500/25 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

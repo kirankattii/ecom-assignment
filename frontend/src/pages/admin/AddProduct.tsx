@@ -3,6 +3,7 @@ import { AdminContext } from "../../context/AdminContext";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { HiOutlineCloudArrowUp, HiOutlineXMark } from "react-icons/hi2";
+import { compressImage } from "../../utils/imageCompressor";
 
 const AddProduct = () => {
   const [images, setImages] = useState<File[]>([]);
@@ -37,8 +38,13 @@ const AddProduct = () => {
         return;
       }
 
+      // Compress all images in parallel before sending to server
+      const compressedImages = await Promise.all(
+        images.map((img) => compressImage(img))
+      );
+
       const formData = new FormData();
-      images.forEach((img) => formData.append("images", img));
+      compressedImages.forEach((img) => formData.append("images", img));
       formData.append("name", name);
       formData.append("description", description);
       formData.append("category", category);
@@ -67,16 +73,14 @@ const AddProduct = () => {
         toast.error(data.message);
       }
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || "Failed to add product.",
-      );
+      toast.error(error.response?.data?.message || "Failed to add product.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={onSubmitHandler} className="flex-1 p-6 md:p-8">
+    <form onSubmit={onSubmitHandler} className="flex-1 p-3 md:p-8">
       <h2 className="text-xl font-semibold text-slate-900 mb-6">Add Product</h2>
 
       <div className="bg-white border border-slate-200/80 rounded-xl px-6 md:px-8 py-8 max-w-4xl shadow-sm">
@@ -100,7 +104,7 @@ const AddProduct = () => {
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-slate-900/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-slate-900/80 rounded-full flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   <HiOutlineXMark className="text-white text-xs" />
                 </button>
@@ -109,7 +113,7 @@ const AddProduct = () => {
             {images.length < 5 && (
               <label
                 htmlFor="product-images"
-                className="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-slate-50/50 transition-all"
+                className="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-[#17AD4C] hover:bg-slate-50/50 transition-all"
               >
                 <HiOutlineCloudArrowUp className="text-slate-400 text-xl" />
                 <span className="text-[10px] text-slate-400 mt-1">Upload</span>
@@ -137,7 +141,7 @@ const AddProduct = () => {
               <input
                 onChange={(e) => setName(e.target.value)}
                 value={name}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
                 type="text"
                 placeholder="Enter product name"
                 required
@@ -151,7 +155,7 @@ const AddProduct = () => {
               <select
                 onChange={(e) => setCategory(e.target.value)}
                 value={category}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
               >
                 <option value="Electronics">Electronics</option>
                 <option value="Clothing">Clothing</option>
@@ -172,7 +176,7 @@ const AddProduct = () => {
               <input
                 onChange={(e) => setPrice(e.target.value)}
                 value={price}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
                 type="number"
                 min="0"
                 step="any"
@@ -191,7 +195,7 @@ const AddProduct = () => {
               <input
                 onChange={(e) => setStock(e.target.value)}
                 value={stock}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
                 type="number"
                 min="0"
                 placeholder="0"
@@ -206,7 +210,7 @@ const AddProduct = () => {
               <textarea
                 onChange={(e) => setDescription(e.target.value)}
                 value={description}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all resize-none"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all resize-none"
                 placeholder="Write product description..."
                 rows={5}
                 required
@@ -219,7 +223,7 @@ const AddProduct = () => {
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 px-8 py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-200 shadow-lg shadow-indigo-500/25 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="mt-6 px-8 py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-[#17AD4C] to-[#139841] hover:from-[#139841] hover:to-[#0f7d34] focus:outline-none focus:ring-2 focus:ring-[#17AD4C]/50 transition-all duration-200 shadow-lg shadow-green-500/25 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {loading ? "Adding Product..." : "Add Product"}
         </button>

@@ -8,6 +8,7 @@ import {
   HiOutlineXMark,
   HiOutlineArrowLeft,
 } from "react-icons/hi2";
+import { compressImage } from "../../utils/imageCompressor";
 
 interface ProductData {
   _id: string;
@@ -18,6 +19,14 @@ interface ProductData {
   stock: number;
   images: { url: string; publicId: string }[];
   isActive: boolean;
+}
+
+interface ImageItem {
+  type: "existing" | "new";
+  url?: string;
+  publicId?: string;
+  file?: File;
+  id?: string;
 }
 
 const EditProduct = () => {
@@ -31,7 +40,7 @@ const EditProduct = () => {
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
-  const [newImages, setNewImages] = useState<File[]>([]);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
@@ -49,6 +58,13 @@ const EditProduct = () => {
           setCategory(p.category);
           setPrice(String(p.price));
           setStock(String(p.stock));
+          setImages(
+            p.images.map((img: any) => ({
+              type: "existing",
+              url: img.url,
+              publicId: img.publicId,
+            }))
+          );
         } else {
           toast.error("Product not found.");
           navigate("/product-list");
@@ -62,21 +78,32 @@ const EditProduct = () => {
     };
 
     if (id) fetchProduct();
-  }, [id]);
+  }, [id, backendUrl, navigate]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setNewImages((prev) => [...prev, ...files].slice(0, 5));
+      const newItems: ImageItem[] = files.map((file) => ({
+        type: "new",
+        file,
+        id: Math.random().toString(36).substring(2, 9),
+      }));
+      setImages((prev) => [...prev, ...newItems].slice(0, 5));
     }
   };
 
-  const removeNewImage = (index: number) => {
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (images.length === 0) {
+      toast.error("Please upload at least one image.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -87,8 +114,23 @@ const EditProduct = () => {
       formData.append("price", price);
       formData.append("stock", stock);
 
-      if (newImages.length > 0) {
-        newImages.forEach((img) => formData.append("images", img));
+      // Separate existing and new images
+      const keptExisting = images
+        .filter((img) => img.type === "existing")
+        .map((img) => ({ url: img.url, publicId: img.publicId }));
+
+      const newFiles = images
+        .filter((img) => img.type === "new")
+        .map((img) => img.file!);
+
+      formData.append("existingImages", JSON.stringify(keptExisting));
+
+      if (newFiles.length > 0) {
+        // Compress new files in parallel before sending to server
+        const compressedNewFiles = await Promise.all(
+          newFiles.map((file) => compressImage(file))
+        );
+        compressedNewFiles.forEach((file) => formData.append("images", file));
       }
 
       const { data } = await axios.put(
@@ -119,13 +161,13 @@ const EditProduct = () => {
   if (fetching) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin h-8 w-8 border-2 border-indigo-500 border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-2 border-[#17AD4C] border-t-transparent rounded-full" />
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmitHandler} className="flex-1 p-6 md:p-8">
+    <form onSubmit={onSubmitHandler} className="flex-1 p-3 md:p-8">
       <div className="flex items-center gap-3 mb-6">
         <button
           type="button"
@@ -138,59 +180,36 @@ const EditProduct = () => {
       </div>
 
       <div className="bg-white border border-slate-200/80 rounded-xl px-6 md:px-8 py-8 max-w-4xl shadow-sm">
-        {/* Current Images */}
-        {product && product.images.length > 0 && newImages.length === 0 && (
-          <div className="mb-6">
-            <p className="text-sm font-medium text-slate-700 mb-3">
-              Current Images
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {product.images.map((img, index) => (
-                <div
-                  key={index}
-                  className="w-20 h-20 rounded-lg overflow-hidden border border-slate-200"
-                >
-                  <img
-                    src={img.url}
-                    alt={`current-${index}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* New Images Upload */}
+        {/* Images Upload & Gallery */}
         <div className="mb-8">
           <p className="text-sm font-medium text-slate-700 mb-3">
-            {newImages.length > 0 ? "New Images (will replace current)" : "Replace Images"}{" "}
+            Product Images{" "}
             <span className="text-slate-400 font-normal">(up to 5)</span>
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            {newImages.map((img, index) => (
+            {images.map((img, index) => (
               <div
-                key={index}
+                key={img.type === "existing" ? img.publicId : img.id}
                 className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 group"
               >
                 <img
-                  src={URL.createObjectURL(img)}
-                  alt={`new-${index}`}
+                  src={img.type === "existing" ? img.url : URL.createObjectURL(img.file!)}
+                  alt={`product-${index}`}
                   className="w-full h-full object-cover"
                 />
                 <button
                   type="button"
-                  onClick={() => removeNewImage(index)}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-slate-900/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-slate-900/80 rounded-full flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
                 >
                   <HiOutlineXMark className="text-white text-xs" />
                 </button>
               </div>
             ))}
-            {newImages.length < 5 && (
+            {images.length < 5 && (
               <label
                 htmlFor="edit-product-images"
-                className="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 hover:bg-slate-50/50 transition-all"
+                className="w-20 h-20 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center cursor-pointer hover:border-[#17AD4C] hover:bg-slate-50/50 transition-all"
               >
                 <HiOutlineCloudArrowUp className="text-slate-400 text-xl" />
                 <span className="text-[10px] text-slate-400 mt-1">Upload</span>
@@ -217,7 +236,7 @@ const EditProduct = () => {
               <input
                 onChange={(e) => setName(e.target.value)}
                 value={name}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
                 type="text"
                 placeholder="Enter product name"
                 required
@@ -231,7 +250,7 @@ const EditProduct = () => {
               <select
                 onChange={(e) => setCategory(e.target.value)}
                 value={category}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
               >
                 <option value="Electronics">Electronics</option>
                 <option value="Clothing">Clothing</option>
@@ -252,7 +271,7 @@ const EditProduct = () => {
               <input
                 onChange={(e) => setPrice(e.target.value)}
                 value={price}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
                 type="number"
                 min="0"
                 step="any"
@@ -270,7 +289,7 @@ const EditProduct = () => {
               <input
                 onChange={(e) => setStock(e.target.value)}
                 value={stock}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all"
                 type="number"
                 min="0"
                 placeholder="0"
@@ -285,7 +304,7 @@ const EditProduct = () => {
               <textarea
                 onChange={(e) => setDescription(e.target.value)}
                 value={description}
-                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 focus:bg-white transition-all resize-none"
+                className="bg-slate-50/50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-800 placeholder-slate-450 focus:outline-none focus:border-[#17AD4C] focus:ring-1 focus:ring-[#17AD4C]/20 focus:bg-white transition-all resize-none"
                 placeholder="Write product description..."
                 rows={5}
                 required
@@ -299,7 +318,7 @@ const EditProduct = () => {
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all duration-200 shadow-lg shadow-indigo-500/25 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+            className="px-8 py-2.5 rounded-lg font-medium text-white bg-gradient-to-r from-[#17AD4C] to-[#139841] hover:from-[#139841] hover:to-[#0f7d34] focus:outline-none focus:ring-2 focus:ring-[#17AD4C]/50 transition-all duration-200 shadow-lg shadow-green-500/25 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
           >
             {loading ? "Updating..." : "Update Product"}
           </button>

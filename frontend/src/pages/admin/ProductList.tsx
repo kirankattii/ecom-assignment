@@ -26,7 +26,10 @@ const ProductList = () => {
 
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [activeImageIndex, setActiveImageIndex] = useState<number>(0);
-  const [productToDelete, setProductToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [productToDelete, setProductToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     if (aToken) {
@@ -71,7 +74,7 @@ const ProductList = () => {
   };
 
   return (
-    <div className="flex-1 p-6 md:p-8">
+    <div className="flex-1 p-3 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-slate-900">All Products</h2>
         <span className="text-sm text-slate-500">
@@ -191,9 +194,7 @@ const ProductList = () => {
                     >
                       <span
                         className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition duration-200 ease-in-out ${
-                          product.isActive
-                            ? "translate-x-4"
-                            : "translate-x-0"
+                          product.isActive ? "translate-x-4" : "translate-x-0"
                         }`}
                       />
                     </button>
@@ -232,9 +233,7 @@ const ProductList = () => {
               {products.length === 0 && (
                 <div className="px-6 py-16 text-center text-slate-400">
                   <p className="text-lg mb-1">No products found</p>
-                  <p className="text-sm">
-                    Start by adding your first product.
-                  </p>
+                  <p className="text-sm">Start by adding your first product.</p>
                 </div>
               )}
             </>
@@ -246,9 +245,19 @@ const ProductList = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-100 bg-slate-50/50">
             {/* Page Info */}
             <div className="text-xs text-slate-500">
-              Showing <span className="font-semibold text-slate-800">{Math.min((currentPage - 1) * limit + 1, totalProducts)}</span> to{" "}
-              <span className="font-semibold text-slate-800">{Math.min(currentPage * limit, totalProducts)}</span> of{" "}
-              <span className="font-semibold text-slate-800">{totalProducts}</span> entries
+              Showing{" "}
+              <span className="font-semibold text-slate-800">
+                {Math.min((currentPage - 1) * limit + 1, totalProducts)}
+              </span>{" "}
+              to{" "}
+              <span className="font-semibold text-slate-800">
+                {Math.min(currentPage * limit, totalProducts)}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-slate-800">
+                {totalProducts}
+              </span>{" "}
+              entries
             </div>
 
             {/* Navigation Buttons */}
@@ -265,14 +274,16 @@ const ProductList = () => {
               {getPageNumbers().map((page, idx) => (
                 <button
                   key={idx}
-                  onClick={() => typeof page === "number" && getAllProducts(page, limit)}
+                  onClick={() =>
+                    typeof page === "number" && getAllProducts(page, limit)
+                  }
                   disabled={page === "..."}
                   className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${
                     page === currentPage
                       ? "bg-indigo-600 border-indigo-500 text-white font-semibold shadow-md shadow-indigo-500/20"
                       : page === "..."
-                      ? "border-transparent text-slate-400 cursor-default"
-                      : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-350 cursor-pointer"
+                        ? "border-transparent text-slate-400 cursor-default"
+                        : "bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-350 cursor-pointer"
                   }`}
                 >
                   {page}
@@ -294,7 +305,7 @@ const ProductList = () => {
       {/* Product Dive Modal */}
       {selectedProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-          <div 
+          <div
             className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl relative animate-scaleUp max-h-[90vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
@@ -351,7 +362,11 @@ const ProductList = () => {
                             : "border-slate-200 hover:border-slate-350"
                         }`}
                       >
-                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={img.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       </button>
                     ))}
                   </div>
@@ -373,33 +388,47 @@ const ProductList = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-slate-50/60 p-3.5 rounded-xl border border-slate-200/50">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Price</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                      Price
+                    </p>
                     <p className="text-lg font-bold text-slate-900 mt-1">
                       ₹{selectedProduct.price.toLocaleString()}
                     </p>
                   </div>
 
                   <div className="bg-slate-50/60 p-3.5 rounded-xl border border-slate-200/50">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Stock Status</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+                      Stock Status
+                    </p>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-base font-bold ${selectedProduct.stock < 10 ? "text-rose-600" : "text-emerald-600"}`}>
+                      <span
+                        className={`text-base font-bold ${selectedProduct.stock < 10 ? "text-rose-600" : "text-emerald-600"}`}
+                      >
                         {selectedProduct.stock}
                       </span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border ${
-                        selectedProduct.stock === 0 
-                          ? "bg-rose-50 text-rose-600 border-rose-100" 
-                          : selectedProduct.stock < 10 
-                          ? "bg-amber-50 text-amber-600 border-amber-100" 
-                          : "bg-emerald-50 text-emerald-600 border-emerald-100"
-                      }`}>
-                        {selectedProduct.stock === 0 ? "Out of Stock" : selectedProduct.stock < 10 ? "Low Stock" : "In Stock"}
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded font-medium border ${
+                          selectedProduct.stock === 0
+                            ? "bg-rose-50 text-rose-600 border-rose-100"
+                            : selectedProduct.stock < 10
+                              ? "bg-amber-50 text-amber-600 border-amber-100"
+                              : "bg-emerald-50 text-emerald-600 border-emerald-100"
+                        }`}
+                      >
+                        {selectedProduct.stock === 0
+                          ? "Out of Stock"
+                          : selectedProduct.stock < 10
+                            ? "Low Stock"
+                            : "In Stock"}
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Description</p>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                    Description
+                  </p>
                   <p className="text-sm text-slate-700 leading-relaxed bg-slate-50/40 p-4 rounded-xl border border-slate-200/40 max-h-[150px] overflow-y-auto whitespace-pre-line">
                     {selectedProduct.description}
                   </p>
@@ -408,11 +437,13 @@ const ProductList = () => {
                 <div className="mt-auto space-y-2 pt-4 border-t border-slate-100">
                   <div className="flex justify-between items-center text-xs text-slate-500">
                     <span>Status:</span>
-                    <span className={`font-semibold px-2 py-0.5 rounded border ${
-                      selectedProduct.isActive 
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-100/60" 
-                        : "bg-slate-100 text-slate-500 border-slate-200/60"
-                    }`}>
+                    <span
+                      className={`font-semibold px-2 py-0.5 rounded border ${
+                        selectedProduct.isActive
+                          ? "bg-emerald-50 text-emerald-600 border-emerald-100/60"
+                          : "bg-slate-100 text-slate-500 border-slate-200/60"
+                      }`}
+                    >
                       {selectedProduct.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -454,7 +485,7 @@ const ProductList = () => {
       {/* Delete Confirmation Modal */}
       {productToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-          <div 
+          <div
             className="bg-white border border-slate-200 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative animate-scaleUp p-6"
             onClick={(e) => e.stopPropagation()}
           >
@@ -462,9 +493,15 @@ const ProductList = () => {
               <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-4 animate-bounce">
                 <HiOutlineExclamationTriangle className="text-2xl" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">Delete Product?</h3>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                Delete Product?
+              </h3>
               <p className="text-sm text-slate-500 leading-relaxed mb-6">
-                Are you sure you want to delete <span className="font-semibold text-rose-600">"{productToDelete.name}"</span>? This action is permanent and cannot be undone.
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-rose-600">
+                  "{productToDelete.name}"
+                </span>
+                ? This action is permanent and cannot be undone.
               </p>
             </div>
 
