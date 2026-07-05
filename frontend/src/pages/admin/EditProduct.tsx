@@ -10,16 +10,6 @@ import {
 } from "react-icons/hi2";
 import { compressImage } from "../../utils/imageCompressor";
 
-interface ProductData {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  price: number;
-  stock: number;
-  images: { url: string; publicId: string }[];
-  isActive: boolean;
-}
 
 interface ImageItem {
   type: "existing" | "new";
@@ -34,7 +24,7 @@ const EditProduct = () => {
   const navigate = useNavigate();
   const { backendUrl, aToken } = useContext(AdminContext);
 
-  const [product, setProduct] = useState<ProductData | null>(null);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -52,7 +42,7 @@ const EditProduct = () => {
         );
         if (data.success) {
           const p = data.data;
-          setProduct(p);
+
           setName(p.name);
           setDescription(p.description);
           setCategory(p.category);

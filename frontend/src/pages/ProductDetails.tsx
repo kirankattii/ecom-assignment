@@ -34,8 +34,6 @@ const ProductDetails = () => {
     }
   });
 
-  // Original price helper
-  const getOriginalPrice = (price: number) => (price * 1.1).toFixed(2);
 
   // Toggle wishlist handler
   const toggleWishlist = (targetId: string, e: React.MouseEvent) => {

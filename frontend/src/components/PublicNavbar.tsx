@@ -1,15 +1,11 @@
-import { useContext } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   HiOutlineMagnifyingGlass,
   HiOutlineUser,
   HiOutlineShoppingBag,
 } from "react-icons/hi2";
-import { AdminContext } from "../context/AdminContext";
-
 const PublicNavbar = () => {
   const navigate = useNavigate();
-  const { aToken } = useContext(AdminContext);
 
   const handleSearchClick = () => {
     // Focus search input on shop page or redirect to shop with query param to focus search

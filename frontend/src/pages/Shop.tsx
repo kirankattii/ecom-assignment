@@ -78,8 +78,6 @@ const Shop = () => {
   // Input ref for auto-focusing
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Original price helper
-  const getOriginalPrice = (price: number) => (price * 1.1).toFixed(2);
 
   // Toggle wishlist handler
   const toggleWishlist = (id: string, e: React.MouseEvent) => {
