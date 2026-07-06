@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { AdminContext } from "../context/AdminContext";
+import { WishlistContext } from "../context/WishlistContext";
 import { HiOutlineHeart, HiHeart } from "react-icons/hi2";
 
 interface Product {
@@ -25,26 +26,7 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [featuredLoading, setFeaturedLoading] = useState<boolean>(true);
 
-  // Wishlist state persisted in Local Storage
-  const [wishlist, setWishlist] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("wishlist") || "[]");
-    } catch {
-      return [];
-    }
-  });
-
-
-  // Toggle wishlist handler
-  const toggleWishlist = (targetId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setWishlist((prev) => {
-      const updated = prev.includes(targetId) ? prev.filter((item) => item !== targetId) : [...prev, targetId];
-      localStorage.setItem("wishlist", JSON.stringify(updated));
-      return updated;
-    });
-  };
+  const { wishlist, toggleWishlist } = useContext(WishlistContext);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -73,7 +55,9 @@ const ProductDetails = () => {
         const { data } = await axios.get(`${backendUrl}/api/products?limit=5`);
         if (data.success) {
           // Filter out the current product
-          const filtered = data.data.products.filter((p: Product) => p._id !== id).slice(0, 4);
+          const filtered = data.data.products
+            .filter((p: Product) => p._id !== id)
+            .slice(0, 4);
           setFeaturedProducts(filtered);
         }
       } catch (err) {
@@ -118,7 +102,9 @@ const ProductDetails = () => {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-800">Product Not Found</h2>
-        <p className="text-slate-500 mt-2">The product you're looking for does not exist or has been removed.</p>
+        <p className="text-slate-500 mt-2">
+          The product you're looking for does not exist or has been removed.
+        </p>
         <Link
           to="/"
           className="mt-6 inline-block bg-[#17AD4C] hover:bg-[#139841] text-white font-semibold px-6 py-2.5 rounded-xl text-sm"
@@ -131,18 +117,20 @@ const ProductDetails = () => {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-        
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 mb-8 sm:mb-12">
-          <Link to="/" className="hover:text-[#17AD4C] transition-colors">Shop</Link>
+          <Link to="/" className="hover:text-[#17AD4C] transition-colors">
+            Shop
+          </Link>
           <span>/</span>
-          <span className="text-slate-600 truncate max-w-[200px]">{product.name}</span>
+          <span className="text-slate-600 truncate max-w-[200px]">
+            {product.name}
+          </span>
         </div>
 
         {/* Main Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start">
-          
           {/* Left Column: Product Images */}
           <div className="flex flex-col gap-4">
             {/* Big Preview */}
@@ -153,9 +141,17 @@ const ProductDetails = () => {
                 className="w-full h-full object-contain p-4 sm:p-6"
               />
               <button
-                onClick={(e) => toggleWishlist(product._id, e)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleWishlist(product._id);
+                }}
                 className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white text-slate-400 hover:scale-105 active:scale-95 transition-all shadow-md border border-slate-150 flex items-center justify-center cursor-pointer"
-                title={wishlist.includes(product._id) ? "Remove from wishlist" : "Add to wishlist"}
+                title={
+                  wishlist.includes(product._id)
+                    ? "Remove from wishlist"
+                    : "Add to wishlist"
+                }
               >
                 {wishlist.includes(product._id) ? (
                   <HiHeart className="text-rose-500 text-xl" />
@@ -223,22 +219,42 @@ const ProductDetails = () => {
               <table className="w-full text-sm">
                 <tbody>
                   <tr className="border-b border-slate-200/50">
-                    <td className="py-2.5 font-medium text-slate-500 w-1/3">Brand</td>
-                    <td className="py-2.5 text-slate-800 font-semibold">Generic</td>
+                    <td className="py-2.5 font-medium text-slate-500 w-1/3">
+                      Brand
+                    </td>
+                    <td className="py-2.5 text-slate-800 font-semibold">
+                      Generic
+                    </td>
                   </tr>
                   <tr className="border-b border-slate-200/50">
                     <td className="py-2.5 font-medium text-slate-500">Color</td>
-                    <td className="py-2.5 text-slate-800 font-semibold">Multi</td>
+                    <td className="py-2.5 text-slate-800 font-semibold">
+                      Multi
+                    </td>
                   </tr>
                   <tr className="border-b border-slate-200/50">
-                    <td className="py-2.5 font-medium text-slate-500">Category</td>
-                    <td className="py-2.5 text-slate-800 font-semibold">{product.category}</td>
+                    <td className="py-2.5 font-medium text-slate-500">
+                      Category
+                    </td>
+                    <td className="py-2.5 text-slate-800 font-semibold">
+                      {product.category}
+                    </td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 font-medium text-slate-500">Availability</td>
+                    <td className="py-2.5 font-medium text-slate-500">
+                      Availability
+                    </td>
                     <td className="py-2.5 font-semibold">
-                      <span className={product.stock > 0 ? "text-emerald-600" : "text-rose-600"}>
-                        {product.stock > 0 ? `In Stock (${product.stock} left)` : "Out of Stock"}
+                      <span
+                        className={
+                          product.stock > 0
+                            ? "text-emerald-600"
+                            : "text-rose-600"
+                        }
+                      >
+                        {product.stock > 0
+                          ? `In Stock (${product.stock} left)`
+                          : "Out of Stock"}
                       </span>
                     </td>
                   </tr>
@@ -255,7 +271,6 @@ const ProductDetails = () => {
                 Buy <span className="hidden sm:inline">now</span>
               </button>
             </div>
-
           </div>
         </div>
 
@@ -274,7 +289,10 @@ const ProductDetails = () => {
           {featuredLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="animate-pulse bg-white border border-slate-100 rounded-2xl p-4 shadow-sm">
+                <div
+                  key={idx}
+                  className="animate-pulse bg-white border border-slate-100 rounded-2xl p-4 shadow-sm"
+                >
                   <div className="aspect-square bg-slate-100 rounded-xl mb-4" />
                   <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
                   <div className="h-3 bg-slate-100 rounded w-1/2 mb-4" />
@@ -288,8 +306,9 @@ const ProductDetails = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {featuredProducts.map((p) => (
-                <div
+                <Link
                   key={p._id}
+                  to={`/product/${p._id}`}
                   className="bg-white border border-slate-200/85 hover:border-[#17AD4C]/30 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
                 >
                   <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center mb-4">
@@ -299,9 +318,17 @@ const ProductDetails = () => {
                       className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     />
                     <button
-                      onClick={(e) => toggleWishlist(p._id, e)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(p._id);
+                      }}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-slate-400 hover:scale-110 active:scale-95 transition-all shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer"
-                      title={wishlist.includes(p._id) ? "Remove from wishlist" : "Add to wishlist"}
+                      title={
+                        wishlist.includes(p._id)
+                          ? "Remove from wishlist"
+                          : "Add to wishlist"
+                      }
                     >
                       {wishlist.includes(p._id) ? (
                         <HiHeart className="text-rose-500 text-base" />
@@ -312,11 +339,9 @@ const ProductDetails = () => {
                   </div>
 
                   <div className="flex-1 flex flex-col">
-                    <Link to={`/product/${p._id}`} className="hover:text-[#17AD4C] transition-colors">
-                      <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-snug line-clamp-1">
-                        {p.name}
-                      </h3>
-                    </Link>
+                    <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-[#17AD4C] transition-colors">
+                      {p.name}
+                    </h3>
                     <p className="text-slate-400 text-xs sm:text-sm line-clamp-2 mt-1 flex-1">
                       {p.description}
                     </p>
@@ -325,20 +350,18 @@ const ProductDetails = () => {
                       <span className="font-bold text-slate-900 text-sm sm:text-base">
                         ₹{p.price.toFixed(2)}
                       </span>
-                      <Link
-                        to={`/product/${p._id}`}
-                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 hover:border-[#17AD4C] text-slate-700 hover:text-white hover:bg-[#17AD4C] transition-all duration-200 cursor-pointer"
+                      <div
+                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 group-hover:border-[#17AD4C] text-slate-700 group-hover:text-white group-hover:bg-[#17AD4C] transition-all duration-200 cursor-pointer"
                       >
                         Buy <span className="hidden sm:inline">now</span>
-                      </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
         </section>
-
       </div>
     </div>
   );

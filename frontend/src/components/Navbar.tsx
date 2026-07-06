@@ -68,7 +68,7 @@ const Navbar = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 rounded-full bg-green-50 text-[#17AD4C] flex items-center justify-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mb-4">
                 <HiOutlineArrowRightOnRectangle className="text-2xl" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Logout</h3>
@@ -86,7 +86,7 @@ const Navbar = () => {
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 py-2.5 rounded-xl bg-[#17AD4C] hover:bg-[#139841] text-sm font-semibold text-white shadow-lg shadow-green-500/20 transition-all cursor-pointer"
+                className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-sm font-semibold text-white shadow-lg shadow-red-600/20 transition-all cursor-pointer"
               >
                 Logout
               </button>

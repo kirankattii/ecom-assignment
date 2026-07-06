@@ -1,11 +1,16 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import {
   HiOutlineMagnifyingGlass,
   HiOutlineUser,
   HiOutlineShoppingBag,
+  HiOutlineHeart,
 } from "react-icons/hi2";
+import { WishlistContext } from "../context/WishlistContext";
+
 const PublicNavbar = () => {
   const navigate = useNavigate();
+  const { wishlist, setIsWishlistOpen } = useContext(WishlistContext);
 
   const handleSearchClick = () => {
     // Focus search input on shop page or redirect to shop with query param to focus search
@@ -87,6 +92,19 @@ const PublicNavbar = () => {
               title="Search products"
             >
               <HiOutlineMagnifyingGlass className="text-xl sm:text-2xl" />
+            </button>
+            <button
+              onClick={() => setIsWishlistOpen(true)}
+              className="relative p-2 text-slate-500 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-all duration-200 cursor-pointer"
+              aria-label="Wishlist"
+              title="Wishlist"
+            >
+              <HiOutlineHeart className="text-xl sm:text-2xl" />
+              {wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-md animate-pulse">
+                  {wishlist.length}
+                </span>
+              )}
             </button>
             <Link
               to="/admin-dashboard"

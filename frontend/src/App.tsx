@@ -16,6 +16,7 @@ import EditProduct from "./pages/admin/EditProduct";
 // Public components & pages
 import PublicNavbar from "./components/PublicNavbar";
 import PublicFooter from "./components/PublicFooter";
+import WishlistSidebar from "./components/WishlistSidebar";
 import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Login from "./pages/Login";
@@ -113,6 +114,7 @@ const App = () => {
           element={
             <div className="flex flex-col min-h-screen">
               <PublicNavbar />
+              <WishlistSidebar />
               <main className="flex-1 flex flex-col bg-white">
                 <Routes>
                   <Route path="/" element={<Shop />} />

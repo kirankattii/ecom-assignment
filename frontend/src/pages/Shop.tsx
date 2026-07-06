@@ -2,6 +2,7 @@ import { useEffect, useState, useContext, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { AdminContext } from "../context/AdminContext";
+import { WishlistContext } from "../context/WishlistContext";
 import { useDebounce } from "../hooks/useDebounce";
 import {
   HiOutlineHeart,
@@ -66,31 +67,10 @@ const Shop = () => {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Wishlist state persisted in Local Storage
-  const [wishlist, setWishlist] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("wishlist") || "[]");
-    } catch {
-      return [];
-    }
-  });
+  const { wishlist, toggleWishlist } = useContext(WishlistContext);
 
   // Input ref for auto-focusing
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-
-  // Toggle wishlist handler
-  const toggleWishlist = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setWishlist((prev) => {
-      const updated = prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id];
-      localStorage.setItem("wishlist", JSON.stringify(updated));
-      return updated;
-    });
-  };
 
   // Auto focus search if redirect parameter present
   useEffect(() => {
@@ -258,8 +238,9 @@ const Shop = () => {
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {products.map((product) => (
-                <div
+                <Link
                   key={product._id}
+                  to={`/product/${product._id}`}
                   className="bg-white border border-slate-200/85 hover:border-[#17AD4C]/30 rounded-2xl p-2 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group"
                 >
                   {/* Image wrapper */}
@@ -270,7 +251,11 @@ const Shop = () => {
                       className="w-full h-full object-cover p-2 group-hover:scale-105 transition-transform duration-300"
                     />
                     <button
-                      onClick={(e) => toggleWishlist(product._id, e)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(product._id);
+                      }}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white text-slate-400 hover:scale-110 active:scale-95 transition-all shadow-sm border border-slate-100 flex items-center justify-center cursor-pointer"
                       title={
                         wishlist.includes(product._id)
@@ -288,14 +273,9 @@ const Shop = () => {
 
                   {/* Content details */}
                   <div className="flex-1 flex flex-col">
-                    <Link
-                      to={`/product/${product._id}`}
-                      className="hover:text-[#17AD4C] transition-colors"
-                    >
-                      <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-snug line-clamp-1">
-                        {product.name}
-                      </h3>
-                    </Link>
+                    <h3 className="font-semibold text-slate-800 text-sm sm:text-base leading-snug line-clamp-1 group-hover:text-[#17AD4C] transition-colors">
+                      {product.name}
+                    </h3>
                     <p className="text-slate-400 text-xs sm:text-sm line-clamp-2 mt-1 flex-1">
                       {product.description}
                     </p>
@@ -305,15 +285,14 @@ const Shop = () => {
                       <span className="font-bold text-slate-900 text-sm sm:text-base">
                         ₹{product.price.toFixed(2)}
                       </span>
-                      <Link
-                        to={`/product/${product._id}`}
-                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 hover:border-[#17AD4C] text-slate-700 hover:text-white hover:bg-[#17AD4C] transition-all duration-200 cursor-pointer"
+                      <div
+                        className="text-xs font-semibold px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-slate-200 group-hover:border-[#17AD4C] text-slate-700 group-hover:text-white group-hover:bg-[#17AD4C] transition-all duration-200 cursor-pointer"
                       >
                         Buy <span className="hidden sm:inline">now</span>
-                      </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 
