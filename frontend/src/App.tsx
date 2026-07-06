@@ -20,12 +20,14 @@ import WishlistSidebar from "./components/WishlistSidebar";
 import Shop from "./pages/Shop";
 import ProductDetails from "./pages/ProductDetails";
 import Login from "./pages/Login";
+import ScrollToTop from "./components/ScrollToTop";
 
 const App = () => {
   const { aToken } = useContext(AdminContext);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+      <ScrollToTop />
       <ToastContainer
         position="top-right"
         autoClose={3000}
