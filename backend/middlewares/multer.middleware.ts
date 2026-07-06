@@ -10,11 +10,15 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback,
 ) => {
-  console.log(`📎 Multer fileFilter called for field="${file.fieldname}", filename="${file.originalname}", mimetype="${file.mimetype}"`);
+  console.log(
+    `Multer fileFilter called for field="${file.fieldname}", filename="${file.originalname}", mimetype="${file.mimetype}"`,
+  );
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    console.warn(`❌ Multer rejected file: ${file.originalname} (mimetype: ${file.mimetype})`);
+    console.warn(
+      `Multer rejected file: ${file.originalname} (mimetype: ${file.mimetype})`,
+    );
     cb(new Error("Only JPG, JPEG, PNG and WEBP image files are allowed."));
   }
 };
@@ -31,4 +35,3 @@ const upload = multer({
 });
 
 export default upload;
-

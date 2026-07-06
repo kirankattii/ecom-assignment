@@ -11,9 +11,9 @@ import mongoose from "mongoose";
 
 export const createProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    console.log("📥 POST /api/products - Received request.");
-    console.log("📝 Request headers:", req.headers);
-    console.log("📝 Body parameters:", req.body);
+    console.log("POST /api/products - Received request.");
+    console.log("Request headers:", req.headers);
+    console.log("Body parameters:", req.body);
 
     const { name, description, category, price, stock } = req.body || {};
 
@@ -22,27 +22,27 @@ export const createProduct = asyncHandler(
      */
 
     if (!name?.trim()) {
-      console.warn("⚠️ Validation error: product name is missing or empty.");
+      console.warn("Validation error: product name is missing or empty.");
       throw new ApiError(400, "Product name is required.");
     }
 
     if (!description?.trim()) {
-      console.warn("⚠️ Validation error: description is missing or empty.");
+      console.warn("Validation error: description is missing or empty.");
       throw new ApiError(400, "Product description is required.");
     }
 
     if (!category?.trim()) {
-      console.warn("⚠️ Validation error: category is missing or empty.");
+      console.warn("Validation error: category is missing or empty.");
       throw new ApiError(400, "Product category is required.");
     }
 
     if (price === undefined || price === null) {
-      console.warn("⚠️ Validation error: price is missing.");
+      console.warn("Validation error: price is missing.");
       throw new ApiError(400, "Product price is required.");
     }
 
     if (stock === undefined || stock === null) {
-      console.warn("⚠️ Validation error: stock is missing.");
+      console.warn("Validation error: stock is missing.");
       throw new ApiError(400, "Product stock is required.");
     }
 
@@ -123,9 +123,6 @@ export const getAllProducts = asyncHandler(
     const limitNumber = Math.max(Number(limit), 1);
     const skip = (pageNumber - 1) * limitNumber;
 
-    /**
-     * Build Filter
-     */
     const filter: Record<string, any> = {};
 
     if (isActive !== undefined) {
@@ -243,8 +240,15 @@ export const updateProduct = asyncHandler(
       throw new ApiError(400, "Invalid product ID.");
     }
 
-    const { name, description, category, price, stock, isActive, existingImages } =
-      req.body || {};
+    const {
+      name,
+      description,
+      category,
+      price,
+      stock,
+      isActive,
+      existingImages,
+    } = req.body || {};
 
     const files = req.files as Express.Multer.File[];
 
@@ -287,7 +291,7 @@ export const updateProduct = asyncHandler(
       const updatedProduct = await Product.findByIdAndUpdate(
         id,
         { $set: updateData },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       );
 
       if (!updatedProduct) {
@@ -348,19 +352,25 @@ export const updateProduct = asyncHandler(
     let keptImages: { url: string; publicId: string }[] = [];
     if (existingImages !== undefined) {
       try {
-        keptImages = typeof existingImages === "string" ? JSON.parse(existingImages) : existingImages;
+        keptImages =
+          typeof existingImages === "string"
+            ? JSON.parse(existingImages)
+            : existingImages;
       } catch (e) {
         keptImages = [];
       }
 
       // Find images that were removed
       const deletedImages = product.images.filter(
-        (img) => !keptImages.some((k) => k.publicId === img.publicId)
+        (img) => !keptImages.some((k) => k.publicId === img.publicId),
       );
       if (deletedImages.length > 0) {
         const deleteIds = deletedImages.map((img) => img.publicId);
         deleteMultipleImages(deleteIds).catch((err) => {
-          console.error("❌ Failed to delete old Cloudinary images in background:", err);
+          console.error(
+            "Failed to delete old Cloudinary images in background:",
+            err,
+          );
         });
       }
 
@@ -374,7 +384,10 @@ export const updateProduct = asyncHandler(
       if (files && files.length > 0) {
         const publicIds = product.images.map((image) => image.publicId);
         deleteMultipleImages(publicIds).catch((err) => {
-          console.error("❌ Failed to delete old Cloudinary images in background:", err);
+          console.error(
+            "Failed to delete old Cloudinary images in background:",
+            err,
+          );
         });
 
         const uploadedImages = await uploadMultipleImages(files, "products");
@@ -416,7 +429,7 @@ export const deleteProduct = asyncHandler(
     if (product.images.length > 0) {
       const publicIds = product.images.map((image) => image.publicId);
       deleteMultipleImages(publicIds).catch((err) => {
-        console.error("❌ Failed to delete Cloudinary images in background:", err);
+        console.error("Failed to delete Cloudinary images in background:", err);
       });
     }
 

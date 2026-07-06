@@ -8,10 +8,10 @@ const connectDB = async (): Promise<void> => {
     });
 
     console.log(
-      `✅ MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`,
+      `MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`,
     );
   } catch (error) {
-    console.error("❌ MongoDB Connection Failed");
+    console.error("MongoDB Connection Failed");
 
     if (error instanceof Error) {
       console.error(error.message);

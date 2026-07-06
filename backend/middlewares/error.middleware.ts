@@ -7,7 +7,7 @@ import ApiError from "../utils/ApiError.js";
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err);
 
-  /**
+  /*
    * Custom API Errors
    */
   if (err instanceof ApiError) {

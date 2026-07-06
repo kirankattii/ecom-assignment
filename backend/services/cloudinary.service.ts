@@ -20,7 +20,7 @@ export const uploadImage = (
       },
       (error, result) => {
         if (error) {
-          console.error("❌ Cloudinary upload callback error:", error);
+          console.error("Cloudinary upload callback error:", error);
           return reject(error);
         }
 
@@ -37,13 +37,13 @@ export const uploadImage = (
 
     // Handle stream-level errors
     uploadStream.on("error", (error) => {
-      console.error("❌ Cloudinary upload stream error:", error);
+      console.error("Cloudinary upload stream error:", error);
       reject(error);
     });
 
     const readStream = streamifier.createReadStream(file.buffer);
     readStream.on("error", (error: any) => {
-      console.error("❌ Streamifier read stream error:", error);
+      console.error("Streamifier read stream error:", error);
       reject(error);
     });
 

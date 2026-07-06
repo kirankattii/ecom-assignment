@@ -12,7 +12,7 @@ const requiredEnvVars = [
 const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-  console.error("❌ Critical: Missing required environment variables:");
+  console.error("Critical: Missing required environment variables:");
   missingEnvVars.forEach((envVar) => {
     console.error(`   - ${envVar}`);
   });
@@ -30,5 +30,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`✅ Server is running at http://localhost:${port}`);
 });
-
-
