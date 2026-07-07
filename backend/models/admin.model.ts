@@ -1,5 +1,3 @@
-// src/models/admin.model.ts
-
 import bcrypt from "bcrypt";
 import { Document, Schema, model } from "mongoose";
 

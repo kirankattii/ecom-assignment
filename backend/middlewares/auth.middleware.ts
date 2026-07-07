@@ -1,5 +1,3 @@
-// src/middlewares/auth.middleware.ts
-
 import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import ApiError from "../utils/ApiError.js";

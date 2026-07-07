@@ -1,5 +1,3 @@
-// src/utils/ApiError.ts
-
 export default class ApiError extends Error {
   statusCode: number;
   errors: unknown[];

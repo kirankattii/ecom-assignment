@@ -1,5 +1,3 @@
-// src/models/product.model.ts
-
 import { Document, Schema, model } from "mongoose";
 
 export interface IProductImage {

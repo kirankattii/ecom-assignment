@@ -1,5 +1,3 @@
-// src/utils/generateToken.ts
-
 import jwt from "jsonwebtoken";
 
 interface TokenPayload {

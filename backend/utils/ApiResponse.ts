@@ -1,5 +1,3 @@
-// src/utils/ApiResponse.ts
-
 export default class ApiResponse<T> {
   success: boolean;
   message: string;

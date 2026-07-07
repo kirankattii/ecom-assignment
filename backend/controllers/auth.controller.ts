@@ -1,5 +1,3 @@
-// src/controllers/auth.controller.ts
-
 import { Request, Response } from "express";
 import Admin from "../models/admin.model.js";
 import ApiError from "../utils/ApiError.js";

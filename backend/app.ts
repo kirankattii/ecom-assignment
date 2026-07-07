@@ -54,7 +54,7 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Product Management API is running 🚀",
+    message: "Product Management API is running",
   });
 });
 
